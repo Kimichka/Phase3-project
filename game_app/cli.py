@@ -1,144 +1,75 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from game_app.models import Base, Game, Platform, game_platform_association
+from game_app.models import Base, Game, Platform
 
 DATABASE_URL = "sqlite:///./games.db"
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
-def main():
-    while True:
-        print("\n--- Game Collection Management ---")
-        print("1. Add game")
-        print("2. List all games")
-        print("3. Filter games by platform")
-        print("4. Edit a game")
-        print("5. Delete a game")
-        print("6. Search by game title")
-        print("7. Exit")
+def main_menu():
+    return input("""
+--- Game Collection Management ---
+1. Add game
+2. List all games
+3. Filter games by platform
+4. Edit a game
+5. Delete a game
+6. Search by game title
+7. Exit
+Enter your choice: """)
 
-        choice = input("Enter your choice: ")
-
-        if choice == "1":
-            add()
-        elif choice == "2":
-            list_games()
-        elif choice == "3":
-            filter_by_platform()
-        elif choice == "4":
-            edit()
-        elif choice == "5":
-            delete()
-        elif choice == "6":
-            search()
-        elif choice == "7":
-            print("Goodbye!")
-            break
-        else:
-            print("Hmm... I didn't get that buddy. Try again?")
-
-def add():
+def add_game(session):
     title = input("Title of the game: ")
-    platforms = input("Platforms for the game (separated by commas like PS2,PC): ")
-
-    session = Session()
-    platform_list = platforms.split(',')
-    platform_objects = []
-
-    for platform_name in platform_list:
-        platform_obj = session.query(Platform).filter_by(name=platform_name.strip()).first()
-        if not platform_obj:
-            platform_obj = Platform(name=platform_name.strip())
-            session.add(platform_obj)
-        platform_objects.append(platform_obj)
-    
-    new_game = Game(title=title)
-    new_game.platforms = platform_objects
-    session.add(new_game)
+    platforms = [session.query(Platform).get_or_404(name.strip()) or Platform(name=name.strip()) for name in input("Platforms (e.g. PS2,PC): ").split(',')]
+    session.add(Game(title=title, platforms=platforms))
     session.commit()
 
-    print(f"Added game {title} for platforms: {platforms}")
-    session.close()
+def list_games(session):
+    for game in session.query(Game).all():
+        print(f"{game.title} - Platforms: {', '.join(platform.name for platform in game.platforms)}")
 
-def list_games():
-    session = Session()
-    games = session.query(Game).all()
+def filter_by_platform(session):
+    platform_name = input("Platform (e.g. PS2, PC): ").strip()
+    platform = session.query(Platform).filter_by(name=platform_name).first()
+    if platform:
+        for game in platform.games:
+            print(game.title)
+    else:
+        print(f"No games found for platform: {platform_name}")
 
-    for game in games:
-        platforms = ", ".join([platform.name for platform in game.platforms])
-        print(f"{game.title} - Platforms: {platforms}")
+def edit_game(session):
+    game_id = int(input("Game ID to edit: "))
+    game = session.query(Game).get(game_id)
+    if game:
+        game.title = input("New game title: ")
+        session.commit()
+    else:
+        print(f"No game found with ID {game_id}")
 
-    session.close()
+def delete_game(session):
+    game_id = int(input("Game ID to delete: "))
+    game = session.query(Game).get(game_id)
+    if game:
+        session.delete(game)
+        session.commit()
+    else:
+        print(f"No game found with ID {game_id}")
 
-def filter_by_platform():
-    platform = input("Platform to filter games like PS2, PC: ")
-
-    session = Session()
-    platform_obj = session.query(Platform).filter_by(name=platform.strip()).first()
-    
-    if not platform_obj:
-        print(f"No games found for this platform: {platform}")
-        session.close()
-        return
-
-    games_for_platform = platform_obj.games
-    for game in games_for_platform:
-        print(game.title)
-
-    session.close()
-
-def edit():
-    game_id = int(input("ID of the game you want to edit: "))
-    new_title = input("New title of the game: ")
-
-    session = Session()
-    game = session.query(Game).filter_by(id=game_id).first()
-
-    if not game:
-        print(f"No game found with ID: {game_id}")
-        session.close()
-        return
-
-    game.title = new_title
-    session.commit()
-
-    print(f"Game with ID {game_id} updated to title: {new_title}")
-    session.close()
-
-def delete():
-    game_id = int(input("ID of the game you want to delete: "))
-
-    session = Session()
-    game = session.query(Game).filter_by(id=game_id).first()
-
-    if not game:
-        print(f"No game found with ID: {game_id}")
-        session.close()
-        return
-
-    session.delete(game)
-    session.commit()
-
-    print(f"Game with ID {game_id} deleted.")
-    session.close()
-
-def search():
-    title_query = input("Enter the game title or part of it to search: ")
-
-    session = Session()
+def search_game(session):
+    title_query = input("Game title to search: ")
     games = session.query(Game).filter(Game.title.like(f"%{title_query}%")).all()
-
-    if not games:
-        print(f"No games found with title containing: {title_query}")
-        session.close()
-        return
-
     for game in games:
-        platforms = ", ".join([platform.name for platform in game.platforms])
-        print(f"{game.title} - Platforms: {platforms}")
+        print(f"{game.title} - Platforms: {', '.join(platform.name for platform in game.platforms)}")
 
-    session.close()
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     Base.metadata.create_all(engine)
-    main()
+    with Session() as session:
+        while (choice := main_menu()) != "7":
+            {
+                "1": add_game,
+                "2": list_games,
+                "3": filter_by_platform,
+                "4": edit_game,
+                "5": delete_game,
+                "6": search_game
+            }.get(choice, lambda s: print("Invalid choice!"))(session)
