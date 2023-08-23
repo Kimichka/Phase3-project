@@ -1,7 +1,7 @@
 import click
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from .models import Base, Game, Platform, game_platform_association
+from game_app.models import Base, Game, Platform, game_platform_association
 
 DATABASE_URL = "sqlite:///./games.db"
 engine = create_engine(DATABASE_URL)
@@ -70,9 +70,48 @@ def filter_by_platform(platform):
 
     session.close()
 
+@click.command()
+@click.option('--id', prompt=True, type=int, help="ID of the game you want to edit.")
+@click.option('--new-title', prompt=True, help="New title of the game.")
+def edit(id, new_title):
+    """Edit a game's details."""
+    session = Session()
+    game = session.query(Game).filter_by(id=id).first()
+
+    if not game:
+        click.echo(f"No game found with ID: {id}")
+        session.close()
+        return
+
+    game.title = new_title
+    session.commit()
+
+    click.echo(f"Game with ID {id} updated to title: {new_title}")
+    session.close()
+
+@click.command()
+@click.option('--id', prompt=True, type=int, help="ID of the game you want to delete.")
+def delete(id):
+    """Delete a game from the collection."""
+    session = Session()
+    game = session.query(Game).filter_by(id=id).first()
+
+    if not game:
+        click.echo(f"No game found with ID: {id}")
+        session.close()
+        return
+
+    session.delete(game)
+    session.commit()
+
+    click.echo(f"Game with ID {id} deleted.")
+    session.close()
+
 cli.add_command(add)
 cli.add_command(list_games)
 cli.add_command(filter_by_platform)
+cli.add_command(edit)
+cli.add_command(delete)
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
