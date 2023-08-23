@@ -9,3 +9,10 @@ This tool helps you manage your video game collection and the platforms they are
 The project uses a virtual environment, in order to install it follow these steps:
 
 $ pipenv install sqlalchemy alembic
+
+## Usage
+
+Navigate to the directory and run the project
+
+$ python run.py
+
