@@ -32,6 +32,8 @@ def add(title, platforms):
     click.echo(f"Added game {title} for platforms: {platforms}")
     session.close()
 
+def cli():
+    pass
 
 cli.add_command(add)
 
