@@ -50,8 +50,29 @@ def list_games():
 
     session.close()
 
+@click.command()
+@click.option('--platform', prompt=True, help="Platform to filter games by, e.g., PS2, PC.")
+def filter_by_platform(platform):
+    """List games for a specific platform."""
+    session = Session()
+
+    platform_obj = session.query(Platform).filter_by(name=platform.strip()).first()
+    
+    if not platform_obj:
+        click.echo(f"No games found for platform: {platform}")
+        session.close()
+        return
+
+    games_for_platform = platform_obj.games
+
+    for game in games_for_platform:
+        click.echo(game.title)
+
+    session.close()
+
 cli.add_command(add)
 cli.add_command(list_games)
+cli.add_command(filter_by_platform)
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
