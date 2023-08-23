@@ -9,12 +9,14 @@ Session = sessionmaker(bind=engine)
 
 @click.group()
 def cli():
+    """CLI tool to manage your game collection."""
     pass
 
-@cli.command() 
+@click.command()
 @click.option('--title', prompt=True, help="Title of the game.")
 @click.option('--platforms', prompt=True, help="Platforms for the game are separated by commas like PS2,PC.")
 def add(title, platforms):
+    """Add a new game to the collection."""
     session = Session()
 
     platform_list = platforms.split(',')
@@ -34,6 +36,22 @@ def add(title, platforms):
 
     click.echo(f"Added game {title} for platforms: {platforms}")
     session.close()
+
+@click.command()
+def list_games():
+    """List all games and their platforms."""
+    session = Session()
+
+    games = session.query(Game).all()
+
+    for game in games:
+        platforms = ", ".join([platform.name for platform in game.platforms])
+        click.echo(f"{game.title} - Platforms: {platforms}")
+
+    session.close()
+
+cli.add_command(add)
+cli.add_command(list_games)
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
