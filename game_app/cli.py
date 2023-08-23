@@ -8,10 +8,12 @@ engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
 @click.group()
-@click.command()
+def cli():
+    pass
+
+@cli.command()  # Note: This is under the 'cli' group now
 @click.option('--title', prompt=True, help="Title of the game.")
 @click.option('--platforms', prompt=True, help="Platforms for the game are separated by commas like PS2,PC.")
-
 def add(title, platforms):
     session = Session()
 
@@ -32,11 +34,6 @@ def add(title, platforms):
 
     click.echo(f"Added game {title} for platforms: {platforms}")
     session.close()
-
-def cli():
-    pass
-
-cli.add_command(add)
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
