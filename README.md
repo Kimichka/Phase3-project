@@ -13,19 +13,19 @@ The project uses a virtual environment. In order to install, follow these steps:
 If for any reason the code does not work follow steps below:
 
 ### Deactivate virtual environment:
-### $deactivate
+ $deactivate
 
 ### Reinstall virtual environment:
-### $rm -rf game_env
+ $rm -rf game_env
 
 ### Recreate the virtual environment:
-### $python3 -m venv game_env
+ $python3 -m venv game_env
 
 ### Activate the new environment:
-### $source game_env/bin/activate
+ $source game_env/bin/activate
 
 ### Now install:
-### $pip install sqlalchemy
+ $pip install sqlalchemy
 
 ## Usage
 
