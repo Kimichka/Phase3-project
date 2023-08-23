@@ -10,7 +10,8 @@ Session = sessionmaker(bind=engine)
 @click.group()
 @click.command()
 @click.option('--title', prompt=True, help="Title of the game.")
-@click.option('--platforms', prompt=True, help="Platforms for the game, separated by commas (e.g., PS2,PC).")
+@click.option('--platforms', prompt=True, help="Platforms for the game are separated by commas like PS2,PC.")
+
 def add(title, platforms):
     session = Session()
 
