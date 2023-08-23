@@ -10,7 +10,7 @@ The project uses a virtual environment. In order to install, follow these steps:
 
 ### $ pipenv install sqlalchemy alembic
 
-If for any reason the code does not work follow steps below:
+If for any reason the code does not work follow the steps below:
 
 ### Deactivate virtual environment:
  $deactivate
