@@ -1,4 +1,4 @@
-# Game Collection CLI Project
+# Game Collection Project
 
 ## Welcome everyone
 
