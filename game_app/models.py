@@ -6,8 +6,7 @@ Base = declarative_base()
 
 game_platform_association = Table('game_platform', Base.metadata,
     Column('game_id', Integer, ForeignKey('games.id')),
-    Column('platform_id', Integer, ForeignKey('platforms.id'))
-)
+    Column('platform_id', Integer, ForeignKey('platforms.id')))
 
 class Game(Base):
     __tablename__ = 'games'
