@@ -35,7 +35,7 @@ def main():
             print("Goodbye!")
             break
         else:
-            print("Invalid choice! Please try again.")
+            print("Hmm... I didn't get that buddy. Try again?")
 
 def add():
     title = input("Title of the game: ")
@@ -71,13 +71,13 @@ def list_games():
     session.close()
 
 def filter_by_platform():
-    platform = input("Platform to filter games by, e.g., PS2, PC: ")
+    platform = input("Platform to filter games like PS2, PC: ")
 
     session = Session()
     platform_obj = session.query(Platform).filter_by(name=platform.strip()).first()
     
     if not platform_obj:
-        print(f"No games found for platform: {platform}")
+        print(f"No games found for this platform: {platform}")
         session.close()
         return
 
