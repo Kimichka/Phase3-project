@@ -1,7 +1,7 @@
 import click
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base, Game, Platform, game_platform_association
+from .models import Base, Game, Platform, game_platform_association
 
 DATABASE_URL = "sqlite:///./games.db"
 engine = create_engine(DATABASE_URL)
@@ -11,7 +11,7 @@ Session = sessionmaker(bind=engine)
 def cli():
     pass
 
-@cli.command()  # Note: This is under the 'cli' group now
+@cli.command() 
 @click.option('--title', prompt=True, help="Title of the game.")
 @click.option('--platforms', prompt=True, help="Platforms for the game are separated by commas like PS2,PC.")
 def add(title, platforms):
