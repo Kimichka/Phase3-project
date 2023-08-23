@@ -28,7 +28,7 @@ def add(title, platforms):
             platform_obj = Platform(name=platform_name.strip())
             session.add(platform_obj)
         platform_objects.append(platform_obj)
-    
+
     new_game = Game(title=title)
     new_game.platforms = platform_objects
     session.add(new_game)
@@ -46,7 +46,7 @@ def list_games():
 
     for game in games:
         platforms = ", ".join([platform.name for platform in game.platforms])
-        click.echo(f"{game.title} - Platforms: {platforms}")
+        click.echo(f"{game.id}. {game.title} - Platforms: {platforms}")
 
     session.close()
 
@@ -57,7 +57,7 @@ def filter_by_platform(platform):
     session = Session()
 
     platform_obj = session.query(Platform).filter_by(name=platform.strip()).first()
-    
+
     if not platform_obj:
         click.echo(f"No games found for platform: {platform}")
         session.close()
@@ -66,7 +66,7 @@ def filter_by_platform(platform):
     games_for_platform = platform_obj.games
 
     for game in games_for_platform:
-        click.echo(game.title)
+        click.echo(f"{game.id}. {game.title}")
 
     session.close()
 
@@ -107,11 +107,30 @@ def delete(id):
     click.echo(f"Game with ID {id} deleted.")
     session.close()
 
+@click.command()
+@click.option('--title', prompt=True, help="Title (or part of the title) of the game you want to search for.")
+def search(title):
+    """Search for a game by its title."""
+    session = Session()
+    matching_games = session.query(Game).filter(Game.title.ilike(f"%{title}%")).all()
+
+    if not matching_games:
+        click.echo(f"No games found with title containing: {title}")
+        session.close()
+        return
+
+    for game in matching_games:
+        platforms = ", ".join([platform.name for platform in game.platforms])
+        click.echo(f"{game.id}. {game.title} - Platforms: {platforms}")
+
+    session.close()
+
 cli.add_command(add)
 cli.add_command(list_games)
 cli.add_command(filter_by_platform)
 cli.add_command(edit)
 cli.add_command(delete)
+cli.add_command(search)
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
