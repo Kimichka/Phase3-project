@@ -21,3 +21,4 @@ class Platform(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, nullable=False)
     games = relationship('Game', secondary=game_platform_association, back_populates='platforms')
+    
